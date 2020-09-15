@@ -1,2 +1,10 @@
 *.out
 data.py
+*.aux
+main.pdf
+*.gz
+*.fls
+*.log
+*.fdb_*
+*-e
+stream.c

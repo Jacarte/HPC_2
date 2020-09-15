@@ -311,7 +311,7 @@ main()
       tuned_STREAM_Copy();
 #else
       // HERE YOU CAN CAN CHANGE SCHEDULE 
-#pragma omp parallel for schedule(guided)
+#pragma omp parallel for %SCHEDULE%
       for (j=0; j<STREAM_ARRAY_SIZE; j++)
 	c[j] = a[j];
 #endif
