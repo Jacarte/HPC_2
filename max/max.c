@@ -5,11 +5,11 @@
 
 #include <omp.h>
 
-#define N 1000000
-#define MAX 2000000
+#define N 10000000
+#define MAX 20000
 
 #define NTHREADS 32
-#define NTRIES 1
+#define NTRIES 2
 
 double maxval = 0.0; 
 int maxloc = 0;
@@ -43,22 +43,61 @@ int max(){
 
 
 // linear max
-int maxOmp(){
+int maxOmpNoCriticalSection(){
 
 	omp_set_num_threads(NTHREADS);
 
-	#pragma omp parallel 
-	{
-		#pragma omp parallel for
-		for (int i=0; i < N; i++){
-			#pragma omp critical {
-				if (x[i] > maxval) {
-					maxval = x[i]; maxloc = i;
-				}
+	#pragma omp parallel for
+	for (int i=0; i < N; i++){
+		if (x[i] > maxval) {
+			maxval = x[i]; maxloc = i;
+		}
+		
+	}
+	
+}
+
+int maxOmpCriticalSection(){
+
+	omp_set_num_threads(NTHREADS);
+
+	#pragma omp parallel for
+	for (int i=0; i < N; i++){
+		#pragma omp critical 
+		{
+			if (x[i] > maxval) {
+				maxval = x[i]; maxloc = i;
 			}
 		}
 	}
+	
 }
+
+double maxValues[NTHREADS];
+int maxLocs[NTHREADS];
+
+int maxOmpTempIndexes(){
+
+	omp_set_num_threads(NTHREADS);
+
+	int th_id;
+
+	#pragma omp parallel for private(th_id)
+	for (int i=0; i < N; i++){
+		th_id = omp_get_thread_num();
+		
+		if (x[i] > maxValues[th_id]) {
+			maxValues[th_id] = x[i]; maxLocs[th_id] = i;
+		}
+		
+	}
+
+	for(int i = 0; i < NTHREADS; i++)
+		if (maxValues[i] > maxval) {
+				maxval = maxValues[i]; maxloc = maxLocs[i];
+		}
+}
+
 
 int main(void){
 	
@@ -68,24 +107,23 @@ int main(void){
 	init_array();
 	t1 = mysecond(); 
 	for(int i = 0; i < NTRIES; i++) 
-		max();
+	 #ifdef SERIAL 
+	 	max(); 
+	 #endif
+	 #ifdef OMP1
+	 	maxOmpNoCriticalSection();
+	 #endif
+	
+	 #ifdef OMP2
+		maxOmpCriticalSection();
+	 #endif
+
+	
+	 #ifdef OMP3
+		maxOmpTempIndexes();
+	 #endif
 	t2 = mysecond();  
 
-	printf("MAX %f, %d  %.6fs\n", maxval, maxloc, (t2 - t1)/(double)NTRIES);
+	printf("%f %d  %.6f\n", maxval, maxloc, (t2 - t1)/(double)NTRIES);
 
-	double baseline = maxval;
-	double baselineloc =maxloc;
-
-	t1 = mysecond();  
-
-	for(int i = 0; i < NTRIES; i++) 
-		maxOmp();
-	t2 = mysecond();  
-
-	if(maxval != baseline)
-		exit(1);
-	if(maxloc != baselineloc)
-		exit(1);
-
-	printf("MAX %f, %d %.6fs\n", maxval, maxloc, (t2 - t1)/(double)NTRIES);
 }
