@@ -10,3 +10,16 @@ Exercise 1 – OpenMP Hello World, get familiar with OpenMP Environment
   - Ways to set the number of threads:
     - Before compiling ```export OMP_NUM_THREADS=<num_threads>```
 	- In runtime ```omp_set_num_threads()```
+
+
+Exercise 2 – STREAM
+
+- Inside the folder stream, run ```bash run_stream.sh```. Ensure your **CC** flag is referencing an openmp-supporting compiler.
+ 
+
+Exercise 3 – MAX
+
+- Inside the folder max, run ```bash measure_all.sh```. Ensure your **CC** flag is referencing an openmp-supporting compiler.
+
+
+The pdf report is in the folder report
