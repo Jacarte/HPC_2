@@ -52,3 +52,17 @@ do
 done
 
 echo "]"
+
+
+threads="1 2 4 8 12 16 20 24 28 32"
+echo -n "data_omp4= ["
+for i in $threads
+do
+	export DEF="-DOMP4 -DNTHREADS=$i"
+	make clean 1>/dev/null 2> /dev/null
+	make max.out 1>/dev/null 2> /dev/null
+	o=$(./max.out  | awk '{ print $3 }')
+	echo -n $o,
+done
+
+echo "]"

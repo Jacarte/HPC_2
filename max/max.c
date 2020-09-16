@@ -10,11 +10,17 @@
 
 #define NTHREADS 32
 #define NTRIES 2
+#define PAD 512
 
 double maxval = 0.0; 
 int maxloc = 0;
 double x[N];
 
+typedef struct {
+	double val;
+	int loc;
+	char padding[PAD];
+} MAXINFO;
 
 double mysecond(){  
 	struct timeval tp;  
@@ -99,6 +105,32 @@ int maxOmpTempIndexes(){
 }
 
 
+
+MAXINFO infos[NTHREADS];
+
+int maxOmpTempIndexesPadding(){
+
+	omp_set_num_threads(NTHREADS);
+
+	int th_id;
+
+	#pragma omp parallel for private(th_id)
+	for (int i=0; i < N; i++){
+		th_id = omp_get_thread_num();
+		
+		if (x[i] > infos[th_id].val) {
+			infos[th_id].val = x[i]; infos[th_id].loc = i;
+		}
+		
+	}
+
+	for(int i = 0; i < NTHREADS; i++)
+		if (infos[i].val > maxval) {
+				maxval = infos[i].val; maxloc =infos[i].loc;
+		}
+}
+
+
 int main(void){
 	
 	double t1, t2;  
@@ -121,6 +153,10 @@ int main(void){
 	
 	 #ifdef OMP3
 		maxOmpTempIndexes();
+	 #endif
+
+	 #ifdef OMP4
+		maxOmpTempIndexesPadding();
 	 #endif
 	t2 = mysecond();  
 
