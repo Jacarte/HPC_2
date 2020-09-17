@@ -1,0 +1,38 @@
+name: Test project
+# This workflow is triggered on pushes to the repository.
+on:
+  push:
+      branches:
+        - master
+jobs:
+  test-hello:
+    name: Test hello-world assigment
+    # This job runs on Linux
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install latex
+        run: sudo apt-get update && sudo apt-get install -y gcc make cmake
+      - name: Test hello-world
+        run: cd hello && make hello.out && ./hello.out
+  test-stream:
+    name: Test stream assigment
+    # This job runs on Linux
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install latex
+        run: sudo apt-get update && sudo apt-get install -y gcc make cmake
+      - name: Test stream
+        run: cd stream && bash run_stream.sh
+  test-max:
+    name: Test max assigment
+    # This job runs on Linux
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install latex
+        run: sudo apt-get update && sudo apt-get install -y gcc make cmake
+      - name: Test max
+        run: cd max && bash measure_all.sh
+      
