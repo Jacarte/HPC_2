@@ -1,4 +1,4 @@
-
+![Test project](https://github.com/Jacarte/HPC_2/workflows/Test%20project/badge.svg)  ![Build report to artifact](https://github.com/Jacarte/HPC_2/workflows/Build%20document%20to%20artifact/badge.svg)
 ## Exercise 1
 
 Exercise 1 – OpenMP Hello World, get familiar with OpenMP Environment
