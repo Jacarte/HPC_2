@@ -8,3 +8,4 @@ main.pdf
 *.fdb_*
 *-e
 stream.c
+__pycache__
