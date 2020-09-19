@@ -1,3 +1,4 @@
+#include <omp.h>
 #include <stdio.h>
 
 int th_id, nthreads;
