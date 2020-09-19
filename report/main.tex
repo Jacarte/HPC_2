@@ -136,7 +136,7 @@ FDD3258 - Introduction to High-Performance Computing
 
 
 \begin{enumerate}
-	\item Write an OpenMP C code with each thread printing Hello World from Thread X! where X is the thread ID.
+	\item Write an OpenMP C code with each thread printing Hello World from Thread X! where X is the thread ID.\\
 	\begin{lstlisting}[style=CStyle]
 #include <omp.h>
 #include <stdio.h>
@@ -201,8 +201,105 @@ We run the given STREAM benchmark program, for which the schedule was set as gui
 			The schedule can be changed by stating the kind of schedule with \texttt{\#pragma omp parallel for schedule(kind(,chunksize))} (line 314 in stream.c).\\
 			For the copy kernel in STREAM, the kind of schedule that offers the highest bandwidth is static. This is because the computation performed by each thread is the same - that is copying a part of the source array into the destination array - which is an ideal situation to use static scheduling. Static scheduling adds the least overhead and is a good fit for cases where the thread workloads are mostly balanced.
 		\end{enumerate}
-
-		
 	\end{enumerate}
+
+\section{Exercise 3. Maxloc, parallel for, race condition atomic, critical and false sharing}
+\begin{enumerate}
+    \item \textit{Measure the performance of the serial code (average + standard deviation)}\\
+    The average performance of the serial code across five runs on Beskow was found to be 0.0084714s and the standard deviation was 0.000562.\\
+    
+    \begin{lstlisting}[style=CStyle]
+int max() {
+	for (int i=0; i < N; i++){
+		if (x[i] > maxval)  {
+			maxval = x[i]; maxloc = i;
+		}
+	}
+}
+
+\end{lstlisting}
+    \item \textit{Use omp parallel for construct to parallelize. Run the code with 32 threads and measure the execution time (average + standard deviation). Is the code correct? If not, why so?}\\
+    The average performance with the \texttt{\#pragma omp parallel for} construct is 0.0026814s and the standard deviation was 0.000049\\
+    The problem with this code is that multiple threads potentially write to the shared variable maxval and maxloc at the same time.\\
+    
+    \begin{lstlisting}[style=CStyle]
+int maxOmpNoCriticalSection() {
+	omp_set_num_threads(NTHREADS);
+	#pragma omp parallel for
+	for (int i=0; i < N; i++){
+		if (x[i] > maxval) {
+			maxval = x[i]; maxloc = i;
+		}
+	}
+}
+    \end{lstlisting}
+    \item \textit{Use omp critical  to protect the code region that might be updated by multiple threads concurrently. Measure the execution time for both versions (omp critical) varying the number of threads: 1,2,4,8,16, 20, 24, 28 and 32. How does the performance compare to 1 and 2? What is the reason for the performance gain/loss?}\\
+    We add a critical section construct to ensure that only thread can modify variables maxloc and maxval at one time. We vary the number of threads from 1 to 32 as specified. In all cases, we observe that adding a critical section decreases performance (slower execution times) as compared to cases 1 and 2. This is because threads must now wait for another thread to exit the critical section before they can enter it.\\
+    
+    \begin{lstlisting}[style=CStyle]
+int maxOmpCriticalSection(){
+	omp_set_num_threads(NTHREADS);
+	#pragma omp parallel for
+	for (int i=0; i < N; i++){
+		#pragma omp critical 
+		{
+			if (x[i] > maxval) {
+				maxval = x[i]; maxloc = i;
+			}
+		}
+	}
+}
+    \end{lstlisting}
+    \item \textit{Try to avoid the use of critical section. Let each thread find the maxloc in its own data then combine their local result to get the final result. For instance, we can use temporary arrays indexed by thread number to hold the values found by each thread. Measure the performance of the new implementation varying the number of threads: 1,2,4,8,16, 20, 24, 28 and 32. Does the performance increase as expected? If not why?}\\
+    An alternative to using critical sections is to allow threads to find maxloc and maxval for the section of the array they are working on and saving these results in temporary arrays. These temporary arrays have values corresponding to one thread each and can then be serially accessed to find the actual values for maxval and maxloc. This strategy eliminates the need for maintaining a critical section, thus reducing the corresponding overhead and leading to an overall increase in performance.\\
+    
+    \begin{lstlisting}[style=CStyle]
+double maxValues[NTHREADS];
+int maxLocs[NTHREADS];
+int maxOmpTempIndexes(){
+	omp_set_num_threads(NTHREADS);
+	int th_id;
+	#pragma omp parallel for private(th_id)
+	for (int i=0; i < N; i++){
+		th_id = omp_get_thread_num();
+		
+		if (x[i] > maxValues[th_id]) {
+			maxValues[th_id] = x[i]; maxLocs[th_id] = i;
+		}
+	}
+	for(int i = 0; i < NTHREADS; i++)
+		if (maxValues[i] > maxval) {
+				maxval = maxValues[i]; maxloc = maxLocs[i];
+		}
+}
+    \end{lstlisting}
+    \item \textit{Write a version of the code in 4 using a technique to remove false sharing with padding. Measure the performance of code varying the number of threads: 1,2,4,8,16, 20, 24, 28 and 32.}\\
+    False sharing can be caused when two threads access and modfiy different variables that happen to lie on the same cache line. The result is that whenever one thread modifies the variable it has access to, the cache line is revalidated, implying that the other variable must also be revalidated even though it may not have been changed. One solution to eliminate false sharing is by the use of some amount of padding so that two variables (arrays, in our example) do not share the same cache line. For the specified number of threads, we observe that the performance improves slightly as compared to case 4. \\
+    \begin{lstlisting}[style=CStyle]
+#define PAD 512
+typedef struct {
+	double val;
+	int loc;
+	char padding[PAD];
+} MAXINFO;
+MAXINFO infos[NTHREADS];
+int maxOmpTempIndexesPadding() {
+	omp_set_num_threads(NTHREADS);
+	int th_id;
+
+	#pragma omp parallel for private(th_id)
+	for (int i=0; i < N; i++){
+		th_id = omp_get_thread_num();
+		if (x[i] > infos[th_id].val) {
+			infos[th_id].val = x[i]; infos[th_id].loc = i;
+		}
+	}
+	for(int i = 0; i < NTHREADS; i++)
+		if (infos[i].val > maxval) {
+				maxval = infos[i].val; maxloc =infos[i].loc;
+		}
+}
+    \end{lstlisting}
+\end{enumerate}
 \end{document}
 
