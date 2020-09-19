@@ -161,12 +161,17 @@ int main(void){
 	\end{lstlisting}
 	\item Answers
 	\begin{enumerate}
-		\item To enable openmp on our local machine (MacBook), we compile the above program with \texttt{gcc-9 -fopenmp hello.c -o hello.out}.
-		\item We execute the program on our local machine with \texttt{./hello.out}
-		\item Ways to set the number of threads:
-		\begin{enumerate}
-			\item Before compiling, set the environment variable, \texttt{export OMP\_NUM\_THREADS=<num\_threads>}
-			\item At runtime \texttt{omp\_set\_num\_threads()}
+	   \item Compiling:
+	       \begin{enumerate}
+	           \item To enable openmp in our local machine (MacBook), we compile the above program with \texttt{gcc-9 -fopenmp hello.c -o hello.out}.
+		        \item To enable openmp on Beskow, we compile the above program with \texttt{gcc -fopenmp hello.c -o hello.out}
+	       \end{enumerate}
+	    \item Running: We execute the program on Beskow with \texttt{./hello.out}
+	    \item Setting the number of threads:
+		    \begin{enumerate}
+    			\item Before compiling, set the environment variable with\\
+    			\texttt{export OMP\_NUM\_THREADS=<num\_threads>}
+    			\item At runtime \texttt{omp\_set\_num\_threads()}
 		\end{enumerate}
 	\end{enumerate}
 	
