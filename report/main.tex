@@ -138,6 +138,7 @@ FDD3258 - Introduction to High-Performance Computing
 \begin{enumerate}
 	\item Write an OpenMP C code with each thread printing Hello World from Thread X! where X is the thread ID.
 	\begin{lstlisting}[style=CStyle]
+#include <omp.h>
 #include <stdio.h>
 
 int th_id, nthreads;
@@ -160,7 +161,8 @@ int main(void){
 	\end{lstlisting}
 	\item Answers
 	\begin{enumerate}
-		\item To enable openmp in my local machine: \texttt{gcc-9 -fopenmp}.
+		\item To enable openmp on our local machine (MacBook), we compile the above program with \texttt{gcc-9 -fopenmp hello.c -o hello.out}.
+		\item We execute the program on our local machine with \texttt{./hello.out}
 		\item Ways to set the number of threads:
 		\begin{enumerate}
 			\item Before compiling, set the environment variable, \texttt{export OMP\_NUM\_THREADS=<num\_threads>}
@@ -191,3 +193,4 @@ int main(void){
 		
 	\end{enumerate}
 \end{document}
+
