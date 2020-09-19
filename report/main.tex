@@ -169,7 +169,7 @@ int main(void){
 	    \item Running the program on Beskow
 	    \begin{enumerate}
 	        \item Request for allocation: \texttt{salloc --nodes=1 -t 00:05:00 -A edu20.fdd3258}
-	        \item Run: \texttt{srun ./hello.out}
+	        \item Run: \texttt{srun -n 1 ./hello.out}
 	    \end{enumerate}
 	    \item Setting the number of threads:
 		    \begin{enumerate}
@@ -183,7 +183,7 @@ int main(void){
 \end{enumerate}
 
 \section{Exercise 2. STREAM benchmark and the importance of threads}
-
+We run the given STREAM benchmark program, for which the schedule was set as guided \texttt{(\#pragma omp parallel for schedule(guided))} five times on Beskow. The mean bandwidth for the copy kernel across a default value of 64 threads, and across the five runs was 48714.62 MB/s and the standard deviation was 137.66.
 	\begin{enumerate}
 		\item \textit{Prepare a plot (with Excel, Matlab, Gnuplot, …) comparing the bandwidth using 1-2-4-8-12-16-20-24-28-32 threads.}
 		
@@ -191,12 +191,15 @@ int main(void){
 			\includegraphics[width=0.8\textwidth]{stream.pdf}
 		\end{figure}
 		\item \textit{How does the bandwidth measured with copy kernel depend on the number of threads?}
+		The bandwidth of the copy kernel in STREAM increases as we increase the number of threads up to a certain threshold, and then flattens out. Adding more threads after an optimal number of threads increases overhead as all the threads have to access the same shared memory system, which itself has a finite bandwidth.
 		\item \textit{Prepare a plot comparing the bandwidth measured with copy kernel with static, dynamic and guided schedules using 32 threads.}
 		\begin{figure}[H]
 			\includegraphics[width=0.8\textwidth]{stream2.pdf}
 		\end{figure}
 		\begin{enumerate}
-			\item \textit{How do you set the schedule in the STREAM code? What is the fastest schedule and why do you think it is so?}
+			\item \textit{How do you set the schedule in the STREAM code? What is the fastest schedule and why do you think it is so?}\\
+			The schedule can be changed by stating the kind of schedule with \texttt{\#pragma omp parallel for schedule(kind(,chunksize))} (line 314 in stream.c).\\
+			For the copy kernel in STREAM, the kind of schedule that offers the highest bandwidth is static. This is because the computation performed by each thread is the same - that is copying a part of the source array into the destination array - which is an ideal situation to use static scheduling. Static scheduling adds the least overhead and is a good fit for cases where the thread workloads are mostly balanced.
 		\end{enumerate}
 
 		
