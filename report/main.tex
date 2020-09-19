@@ -164,9 +164,13 @@ int main(void){
 	   \item Compiling:
 	       \begin{enumerate}
 	           \item To enable openmp in our local machine (MacBook), we compile the above program with \texttt{gcc-9 -fopenmp hello.c -o hello.out}.
-		        \item To enable openmp on Beskow, we compile the above program with \texttt{gcc -fopenmp hello.c -o hello.out}
+		        \item To enable openmp on Beskow, we compile the above program with \texttt{cc -fopenmp hello.c -o hello.out}
 	       \end{enumerate}
-	    \item Running: We execute the program on Beskow with \texttt{./hello.out}
+	    \item Running the program on Beskow
+	    \begin{enumerate}
+	        \item Request for allocation: \texttt{salloc --nodes=1 -t 00:05:00 -A edu20.fdd3258}
+	        \item Run: \texttt{srun ./hello.out}
+	    \end{enumerate}
 	    \item Setting the number of threads:
 		    \begin{enumerate}
     			\item Before compiling, set the environment variable with\\
