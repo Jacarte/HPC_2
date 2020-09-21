@@ -52,16 +52,27 @@ int main(void){
 
 
 		for(int q = 0; q < n; q++){
+			forces[q][0] = 0; 
+			forces[q][1] = 0; 
+		}
+
+		for(int q = 0; q < n; q++){
 			for(int k = 0; k < n; k++){
-				if(k != q){
+				if(k > q){
 					double xdiff = position[q][0] - position[k][0];
 					double ydiff = position[q][1] - position[k][1];
 
 					double dist = sqrt(xdiff*xdiff + ydiff*ydiff); 
             		double dist_cubed = dist*dist*dist; 
 
-					forces[q][0] -= G*masses[q]*masses[k]/dist_cubed * xdiff; 
-					forces[q][1] -= G*masses[q]*masses[k]/dist_cubed * ydiff; 
+					double x_force = G*masses[q]*masses[k]/dist_cubed * xdiff; 
+					double y_force = G*masses[q]*masses[k]/dist_cubed * ydiff; 
+					
+
+					forces[q][1] += y_force; 
+					forces[k][0] -= x_force; 
+					forces[k][1] -= y_force;
+					forces[k][0] += x_force;
 				}
 			}
 		}
