@@ -1,6 +1,6 @@
 
 nbody.out: nbody.c
-	${CC} nbody.c -o nbody.out
+	${CC} ${CFLAGS} nbody.c -o nbody.out
 
 clean:
 	rm *.out

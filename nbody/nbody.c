@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 
+
 int time_delta;
 int n;
 int *initial_position;
@@ -17,21 +18,41 @@ int main(void){
 	initial_velocity = (int*) malloc(sizeof(int)*n*2);
 
 	for(int i = 0; i < n; i++){
-		scanf("%d %d", &initial_position[i], &initial_position[i + 1]);
+		// Components should be stored one at a side, it would be better to load
+		scanf("%d %d %d %d", &initial_position[i], &initial_position[i + 1], &initial_velocity[i], &initial_velocity[i + 1]); 
+	}
+
+	#ifdef DEBUG
+
+	for(int i = 0; i < n; i++){
+		printf("Positions\n\t%d %d\n", initial_position[i], initial_position[i + 1]);
 	}
 
 	for(int i = 0; i < n; i++){
-		scanf("%d %d", &initial_velocity[i], &initial_velocity[i + 1]);
+		printf("Velocities\n\t%d %d\n", initial_velocity[i], initial_velocity[i + 1]);
 	}
 
+	#endif
 
-	for(int i = 0; i < n; i++){
-		printf("\t%d %d\n", initial_velocity[i], initial_velocity[i + 1]);
+	#ifdef DEBUG1
+	printf("Processing...\n");
+	#endif
+
+	for(int i = 1; i <= T; i++){
+		int time_step = i*time_delta;
+
+		if(i == T){
+			printf("Simulation results\n idx - (postion) (velocity)\n");
+
+			for(int i = 0; i < n; i++){
+				printf("%d - (%d, %d)  (%d, %d)", i, initial_position[i], initial_position[i + 1], initial_velocity[i], initial_velocity[i + 1]);
+			}
+			printf("\n");
+		}
 	}
 
 	free(initial_position);
 	free(initial_velocity);
-	printf("Processing...\n");
-		
+
 	return 0;
 }
