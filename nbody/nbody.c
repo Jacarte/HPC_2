@@ -87,11 +87,9 @@ int main(void){
 	for(int i = 1; i <= T; i++){
 		int time_step = i*time_delta;
 
-
-
 		for(int q = 0; q < n; q++){
-			forces[q][0] = 0; 
-			forces[q][1] = 0; 
+			for(int d = 0 ; d < DIM; d++)
+				forces[q][d] = 0; 
 		}
 
 		for(int q = 0; q < n; q++){
@@ -101,6 +99,7 @@ int main(void){
 				#else
 				if (k != q) {
 				#endif
+				
 					double xdiff = position[q][0] - position[k][0];
 					double ydiff = position[q][1] - position[k][1];
 
@@ -116,12 +115,13 @@ int main(void){
 					#endif
 
 
-					forces[q][1] += y_force; 
-					forces[q][0] += x_force;
-
-					#ifdef REDUCED
 					forces[k][0] -= x_force; 
 					forces[k][1] -= y_force;
+
+					#ifdef REDUCED
+
+					forces[q][1] += y_force; 
+					forces[q][0] += x_force;
 					#endif
 
 				}
