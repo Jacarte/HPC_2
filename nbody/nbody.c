@@ -135,11 +135,9 @@ int main(void){
 			position[q][0] += time_delta*velocity[q][0]; 
 			position[q][1] += time_delta*velocity[q][1]; 
 
-			#pragma omp critical 
-			{
-				velocity[q][0] += time_delta/masses[q]*forces[q][0]; 
-				velocity[q][1] += time_delta/masses[q]*forces[q][1];
-			}
+			velocity[q][0] += time_delta/masses[q]*forces[q][0]; 
+			velocity[q][1] += time_delta/masses[q]*forces[q][1];
+			
 		}
 
 		// print general stats
