@@ -118,11 +118,11 @@
 	    	    
 	    for(int n=0; n < N;n++){
 	       // Generate random discrete-time signal x in range (-1,+1)
-	       xr[n] = ((double)(2.0 * rand()) / RAND_MAX) - 1.0;
-	       xi[n] = ((double)(2.0 * rand()) / RAND_MAX) - 1.0;
+	       // xr[n] = ((double)(2.0 * rand()) / RAND_MAX) - 1.0;
+	       // xi[n] = ((double)(2.0 * rand()) / RAND_MAX) - 1.0;
 	       // constant real signal
-	       // xr[n] = 1.0;
-	       // xi[n] = 0.0;
+	        xr[n] = 1.0;
+	        xi[n] = 0.0;
 	    }
 		return 1; 
 	}
