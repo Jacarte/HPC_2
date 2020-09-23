@@ -20,6 +20,8 @@
 	// 0.01 precision good for N > 8000
 	#define R_ERROR 0.01
 	
+	#define NTHREADS 32
+	
 	// main routine to calculate DFT
 	int DFT(int idft, double* xr, double* xi, double* Xr_o, double* Xi_o, int N);
 	// set the input array with random number
@@ -85,28 +87,48 @@
 	// DFT/IDFT routine
 	// idft: 1 direct DFT, -1 inverse IDFT (Inverse DFT)
 	int DFT(int idft, double* xr, double* xi, double* Xr_o, double* Xi_o, int N) {
-	#pragma omp parallel for
-	  for (int k=0 ; k<N ; k++)
-	    {
-	        for (int n=0 ; n<N ; n++)  {
+	  	omp_set_num_threads(NTHREADS);
+	  	int i;
+	    // Compute for each thread
+	#pragma omp parallel private(i)
+	{
+	    int id = omp_get_thread_num();
+	    // create and initialize private real, complex vectors for each thread
+	    double* private_Xr_o = (double*) malloc (NTHREADS *sizeof(double));
+	    double* private_Xi_o = (double*) malloc (NTHREADS *sizeof(double));
+	    setOutputZero(private_Xr_o, private_Xi_o, NTHREADS);
+	    
+	    for (int k = 0; k < N; k++) {
+	        // divide equally among threads
+	        for (i = id; i < N; i += NTHREADS) {
+	            // Real part of X[k]
+	            private_Xr_o[id] +=  xr[i] * cos(i * k * PI2 / N) + idft*xi[i]*sin(i * k * PI2 / N);
+	            // Imaginary part of X[k]
+	            private_Xi_o[id] += -idft*xr[i] * sin(i * k * PI2 / N) + xi[i] * cos(i * k * PI2 / N);
+	        }
+	    }
+	    
+	 #pragma omp critical
+	    // combine to shared output vector in critical section
+	    for (int k=0 ; k<N ; k++) {
+	        for (i=0 ; i<NTHREADS; i++)  {
 	          // Real part of X[k]
-	          Xr_o[k] += xr[n] * cos(n * k * PI2 / N) + idft*xi[n]*sin(n * k * PI2 / N);
+	          Xr_o[k] += private_Xr_o[i];
 	          // Imaginary part of X[k]
-	          Xi_o[k] += -idft*xr[n] * sin(n * k * PI2 / N) + xi[n] * cos(n * k * PI2 / N);
+	          Xi_o[k] += private_Xi_o[i];
 	            
 	        } 
 	    }
-	    
+	 }
 	    // normalize if you are doing IDFT
 	    if (idft==-1) {
-	    #pragma omp parallel for
 	    	for (int n=0 ; n<N ; n++) {
 	    	Xr_o[n] /=N;
 	    	Xi_o[n] /=N;
 	    }
 	  }
 	  return 1; 
-	}
+	 }
 	
 	// set the initial signal 
 	// be careful with this 
@@ -121,8 +143,8 @@
 	       // xr[n] = ((double)(2.0 * rand()) / RAND_MAX) - 1.0;
 	       // xi[n] = ((double)(2.0 * rand()) / RAND_MAX) - 1.0;
 	       // constant real signal
-	        xr[n] = 1.0;
-	        xi[n] = 0.0;
+	       xr[n] = 1.0;
+	       xi[n] = 0.0;
 	    }
 		return 1; 
 	}
