@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <math.h>
+#include <stdlib.h>
 
 #define DIM 2
 typedef double vect_t[DIM];
@@ -16,6 +17,21 @@ vect_t *forces;
 double *masses;
 int T;
 
+int init(){
+
+	for(int i = 0; i < n; i++){
+		position[i][0] = (rand()/(double)(RAND_MAX))*2 - 1;
+		position[i][1] = (rand()/(double)(RAND_MAX))*2 - 1;
+
+
+		velocity[i][0] = (rand()/(double)(RAND_MAX))*2 - 1;
+		velocity[i][1] = (rand()/(double)(RAND_MAX))*2 - 1;
+
+		masses[i] = fabs((rand()/(double)(RAND_MAX))*2 - 1);
+	}
+	return 0;
+}
+
 int main(void){
 
 	printf("Set input data as follows: <number of particles> <delta_time> <Time> <for each particle <mass> <x0> <y0> <vx0> <vy0>>\n");
@@ -26,10 +42,16 @@ int main(void){
 	forces = (vect_t*) malloc(sizeof(vect_t)*n);
 	masses = (double*) malloc(sizeof(double)*n);
 
-	for(int i = 0; i < n; i++){
-		scanf("%lf %lf %lf %lf %lf", &masses[i], &position[i][0], &position[i][1], &velocity[i][0], &velocity[i][1]); 
-	}
+	#ifdef RANDOM_INIT
+		init();
+	#else
+		
+		for(int i = 0; i < n; i++){
+			scanf("%lf %lf %lf %lf %lf", &masses[i], &position[i][0], &position[i][1], &velocity[i][0], &velocity[i][1]); 
+		}
 
+	#endif
+	
 	#ifdef DEBUG
 
 	for(int i = 0; i < n; i++){
@@ -68,20 +90,32 @@ int main(void){
 					double x_force = G*masses[q]*masses[k]/dist_cubed * xdiff; 
 					double y_force = G*masses[q]*masses[k]/dist_cubed * ydiff; 
 					
+	
+					#ifdef DEBUG1
+						printf("Processing...\n");
+					#endif
+
 
 					forces[q][1] += y_force; 
+					forces[q][0] += x_force;
 					forces[k][0] -= x_force; 
 					forces[k][1] -= y_force;
-					forces[k][0] += x_force;
+
 				}
 			}
+
+			position[q][0] += time_delta*velocity[q][0]; 
+			position[q][1] += time_delta*velocity[q][1]; 
+
+			velocity[q][0] += time_delta/masses[q]*forces[q][0]; 
+			velocity[q][1] += time_delta/masses[q]*forces[q][1];
 		}
 
 		if(i == T){
 			printf("Simulation results\n idx - (postion) (velocity)\n");
 
 			for(int i = 0; i < n; i++){
-				printf("%d - (%lf, %lf)  (%lf, %lf)", i, position[i][0], position[i][1], velocity[i][0], velocity[i][1]);
+				printf("%d - (%lf, %lf)  (%lf, %lf)\n", i, position[i][0], position[i][1], velocity[i][0], velocity[i][1]);
 			}
 			printf("\n");
 		}
