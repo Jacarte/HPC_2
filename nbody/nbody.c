@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
+#include <sys/time.h>
 
 #define DIM 2
 typedef double vect_t[DIM];
@@ -16,6 +17,14 @@ vect_t *velocity;
 vect_t *forces;
 double *masses;
 int T;
+
+double mysecond(){  
+	struct timeval tp;  
+	struct timezone tzp;  
+	int i;  i = gettimeofday(&tp,&tzp);  
+	return ( 
+		(double) tp.tv_sec + (double) tp.tv_usec * 1.e-6 );}
+
 
 int init(){
 
@@ -34,7 +43,9 @@ int init(){
 
 int main(void){
 
+	#ifndef MEASURE_TIME
 	printf("Set input data as follows: <number of particles> <delta_time> <Time> <for each particle <mass> <x0> <y0> <vx0> <vy0>>\n");
+	#endif
 	scanf("%d %lf %d", &n, &time_delta, &T);
 
 	position = (vect_t*) malloc(sizeof(vect_t)*n);
@@ -68,6 +79,11 @@ int main(void){
 	printf("Processing...\n");
 	#endif
 
+	#ifdef MEASURE_TIME
+	double t1, t2;  
+	t1 = mysecond(); 
+	#endif
+
 	for(int i = 1; i <= T; i++){
 		int time_step = i*time_delta;
 
@@ -80,7 +96,11 @@ int main(void){
 
 		for(int q = 0; q < n; q++){
 			for(int k = 0; k < n; k++){
+				#ifdef REDUCED
 				if(k > q){
+				#else
+				if (k != q) {
+				#endif
 					double xdiff = position[q][0] - position[k][0];
 					double ydiff = position[q][1] - position[k][1];
 
@@ -98,8 +118,11 @@ int main(void){
 
 					forces[q][1] += y_force; 
 					forces[q][0] += x_force;
+
+					#ifdef REDUCED
 					forces[k][0] -= x_force; 
 					forces[k][1] -= y_force;
+					#endif
 
 				}
 			}
@@ -111,13 +134,20 @@ int main(void){
 			velocity[q][1] += time_delta/masses[q]*forces[q][1];
 		}
 
+		// print general stats
 		if(i == T){
+
+			#ifdef MEASURE_TIME
+			t2 = mysecond(); 
+			printf("%d %f %d %.6f\n", n, time_delta, T, (t2 - t1));
+			#else
 			printf("Simulation results\n idx - (postion) (velocity)\n");
 
 			for(int i = 0; i < n; i++){
 				printf("%d - (%lf, %lf)  (%lf, %lf)\n", i, position[i][0], position[i][1], velocity[i][0], velocity[i][1]);
 			}
 			printf("\n");
+			#endif
 		}
 	}
 
