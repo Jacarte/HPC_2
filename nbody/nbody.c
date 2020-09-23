@@ -4,6 +4,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <sys/time.h>
+#include <omp.h>
 
 #define DIM 2
 typedef double vect_t[DIM];
@@ -92,6 +93,7 @@ int main(void){
 				forces[q][d] = 0; 
 		}
 
+		#pragma omp parallel for schedule(static, 100)
 		for(int q = 0; q < n; q++){
 			for(int k = 0; k < n; k++){
 				#ifdef REDUCED
@@ -104,14 +106,16 @@ int main(void){
 					double ydiff = position[q][1] - position[k][1];
 
 					double dist = sqrt(xdiff*xdiff + ydiff*ydiff); 
-            		double dist_cubed = dist*dist*dist; 
+					double dist_cubed = dist*dist*dist; 
 
 					double x_force = G*masses[q]*masses[k]/dist_cubed * xdiff; 
 					double y_force = G*masses[q]*masses[k]/dist_cubed * ydiff; 
 					
 	
 					#ifdef DEBUG1
-						printf("Processing...\n");
+
+    					int th_id = omp_get_thread_num();
+						printf("Processing...%d\n", th_id);
 					#endif
 
 
@@ -126,12 +130,16 @@ int main(void){
 
 				}
 			}
+			
 
 			position[q][0] += time_delta*velocity[q][0]; 
 			position[q][1] += time_delta*velocity[q][1]; 
 
-			velocity[q][0] += time_delta/masses[q]*forces[q][0]; 
-			velocity[q][1] += time_delta/masses[q]*forces[q][1];
+			#pragma omp critical 
+			{
+				velocity[q][0] += time_delta/masses[q]*forces[q][0]; 
+				velocity[q][1] += time_delta/masses[q]*forces[q][1];
+			}
 		}
 
 		// print general stats

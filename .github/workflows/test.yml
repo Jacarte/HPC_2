@@ -35,4 +35,14 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y gcc make cmake
       - name: Test max
         run: cd max && bash measure_all.sh
+  test-nbody:
+    name: Test n body
+    # This job runs on Linux
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y gcc make cmake
+      - name: Test max
+        run: cd nbody && bash test.sh && bash run_all.sh
       

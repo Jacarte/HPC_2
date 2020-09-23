@@ -164,6 +164,7 @@ int main(void){
 		\item Ways to set the number of threads:
 		\begin{enumerate}
 			\item Before compiling, set the environment variable, \texttt{export OMP\_NUM\_THREADS=<num\_threads>}
+			\item Before compiling, set the environment variable, \texttt{\#pragma omp parallel num\_thread(x)}
 			\item At runtime \texttt{omp\_set\_num\_threads()}
 		\end{enumerate}
 	\end{enumerate}
