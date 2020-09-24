@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from data import data_static, data_guided, data_dynamic
+from data_stream import data_static, data_guided, data_dynamic
 import sys
 
 from latex_common import *
@@ -27,5 +27,6 @@ a3, = ax.plot(xs, Ys_guided, 'o--')
 ax.set_xlabel("Number of threads")
 ax.set_ylabel("Copy bandwidth")
 plt.legend( [a1, a2, a3],["Static schedule", "Dynamic schedule", "Guided schedule"])
+plt.tight_layout()
 
 plt.savefig(sys.argv[2]) # out folder is the first arg
