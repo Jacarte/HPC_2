@@ -18,10 +18,16 @@
 	#define PI2 6.28318530718
 	// this for the rounding error, increasing N rounding error increases
     // 0.01 precision good for N > 8000
-	#define R_ERROR 0.01
+	#define R_ERROR 0.1
 
-	#define NTHREADS 2
+	#define COMPONENTS 8000
+
+	#ifndef NTHREADS
+	#define NTHREADS 10
+	#endif
+	// #define NTHREADS 8
 	
+	#define PAD 512
 	// main routine to calculate DFT
 	int DFT(int idft, double* xr, double* xi, double* Xr_o, double* Xi_o, int N);
 	// set the input array with random number
@@ -36,9 +42,10 @@
 
 	int main(int argc, char* argv[]){
 	  // size of input array
-	  int N = 8000; // 8,000 is a good number for testing
+	  int N = COMPONENTS; // 8,000 is a good number for testing
+	  #ifndef ONLY_TIME
 	  printf("DFTW calculation with N = %d \n",N);
-	  
+	  #endif
 	  // Allocate array for input vector
 	  double* xr = (double*) malloc (N *sizeof(double));
 	  double* xi = (double*) malloc (N *sizeof(double));
@@ -68,8 +75,11 @@
 
 	  // stop timer
 	  double run_time = omp_get_wtime() - start_time;
+	  #ifndef ONLY_TIME
 	  printf("DFTW computation in %f seconds\n",run_time);
-	  
+	  #else
+	  printf("%f\n",run_time);
+	  #endif
 	  // check the results: easy to make correctness errors with openMP
 	  checkResults(xr,xi,xr_check,xi_check,Xr_o, Xi_o, N);
 	  // print the results of the DFT
@@ -85,39 +95,44 @@
 	  return 1;
 	}
 
+
+	typedef struct {
+		double r;
+		int i;
+		char padding[PAD];
+	} TMPINFO;
 	// DFT/IDFT routine
 	// idft: 1 direct DFT, -1 inverse IDFT (Inverse DFT)
 	int DFT(int idft, double* xr, double* xi, double* Xr_o, double* Xi_o, int N){
 		omp_set_num_threads(NTHREADS);
-		int size = N/NTHREADS ;
+		TMPINFO* tmp = (TMPINFO *) malloc(NTHREADS*sizeof(TMPINFO));
 
 	  	for (int k=0 ; k<N ; k++)
-	    {			
-			#pragma omp parallel 
-			{	
+	    {		
+
+
+			for(int i = 0; i < NTHREADS; i++){
+				tmp[i].r = 0.0;
+				tmp[i].i = 0.0;	
+			}
+
+			#pragma omp parallel for schedule(static)
+			for (int n=0; n < N  ; n++)  {
+				// Real part of X[k]
 				int id = omp_get_thread_num();
-				int to = (id + 1)*size;
-				double tmpkr = 0.0;
-				double tmpki = 0.0;
 
-				if(N%NTHREADS != 0 && id == NTHREADS - 1) // last thread
-					to += N%NTHREADS;
-
-				for (int n=id*size ; n < to  ; n++)  {
-					// Real part of X[k]
-					tmpkr += xr[n] * cos(n * k * PI2 / N) + idft*xi[n]*sin(n * k * PI2 / N);
-					// Imaginary part of X[k]
-					tmpki += -idft*xr[n] * sin(n * k * PI2 / N) + xi[n] * cos(n * k * PI2 / N);
-					
-				}
-
-				#pragma omp critical
-				Xr_o[k] += tmpkr;
-				Xi_o[k] += tmpki;
+				tmp[id].r += xr[n] * cos(n * k * PI2 / N) + idft*xi[n]*sin(n * k * PI2 / N);
+				// Imaginary part of X[k]
+				tmp[id].i += -idft*xr[n] * sin(n * k * PI2 / N) + xi[n] * cos(n * k * PI2 / N);
 				
+			}
 
-			} 
+			for(int i = 0; i < NTHREADS; i++){
+				Xr_o[k] += tmp[i].r;
+				Xi_o[k] += tmp[i].i;	
+			}			
 	    }
+		free(tmp);
 
 	    // normalize if you are doing IDFT
 	    if (idft==-1){
@@ -167,7 +182,9 @@
 			    printf("ERROR - x[%d] = %f, inv(X)[%d]=%f \n",n,xi[n], n,xi_check[n]);
 
 		}
+		#ifndef ONLY_TIME
 		printf("Xre[0] = %f \n",Xr_o[0]);
+		#endif
 		return 1;
 	}
 
