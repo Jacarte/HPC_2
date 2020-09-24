@@ -302,10 +302,15 @@ int maxOmpTempIndexesPadding() {
     \end{lstlisting}
 \end{enumerate}
 \section{Exercise 4. DFTW, The Fastest DFT in the West}
-
-\begin{figure}[H]
-	\centering
+\begin{enumerate}
+    \item \textit{Parallelize the DFTW code with OpenMP. You can develop different strategies; the important point is that the code produces the correct results and it is fast!}
+    \item \textit{Measure the performance on Beskow 32 cores reporting the average values and standard deviation for DFTW using an input size equal to 10000 (N=10000).}
+    \item \textit{Prepare a speed-up plot varying the number of threads: 1, 2, 4, 8, 12, 16, 20, 24, 28 and 32.}
+    \begin{figure}[H]
+    \centering
 	\includegraphics[width=0.8\textwidth]{dftw.pdf}
-\end{figure}
+	\end{figure}
+    \item \textit{Which performance optimizations would be suitable for DFT, other than parallelization with OpenMP? Explain, no need for implementing the optimizations.}
+\end{enumerate}
 \end{document}
 
