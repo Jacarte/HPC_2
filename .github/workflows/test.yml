@@ -43,8 +43,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y gcc make cmake
-      - name: Test max
-        run: cd dftw && export CCFLAGS="-DNTHREADS=8" && make && ./DFTW_1.out
+      - name: Test dftw
+        run: cd dftw && export FF="-DNTHREADS=8" && make && ./DFTW_1.out
   test-nbody:
     name: Test n body
     # This job runs on Linux
@@ -53,6 +53,6 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y gcc make cmake
-      - name: Test max
-        run: cd nbody && bash test.sh && bash run_all.sh
+      - name: Test n body
+        run: cd nbody && bash test.sh 
       
