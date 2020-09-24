@@ -48,7 +48,7 @@ int max(){
 }
 
 
-// linear max
+// parallel max
 int maxOmpNoCriticalSection(){
 
 	omp_set_num_threads(NTHREADS);
@@ -63,6 +63,7 @@ int maxOmpNoCriticalSection(){
 	
 }
 
+// max with critical section
 int maxOmpCriticalSection(){
 
 	omp_set_num_threads(NTHREADS);
@@ -79,6 +80,7 @@ int maxOmpCriticalSection(){
 	
 }
 
+// max value per thread
 double maxValues[NTHREADS];
 int maxLocs[NTHREADS];
 
@@ -105,7 +107,7 @@ int maxOmpTempIndexes(){
 }
 
 
-
+// false sharing and padding
 MAXINFO infos[NTHREADS];
 
 int maxOmpTempIndexesPadding(){
@@ -163,3 +165,4 @@ int main(void){
 	printf("%f %d  %.6f\n", maxval, maxloc, (t2 - t1)/(double)NTRIES);
 
 }
+
