@@ -20,7 +20,7 @@
     // 0.01 precision good for N > 8000
 	#define R_ERROR 0.01
 
-	#define NTHREADS 3
+	#define NTHREADS 2
 	
 	// main routine to calculate DFT
 	int DFT(int idft, double* xr, double* xi, double* Xr_o, double* Xi_o, int N);
@@ -92,13 +92,13 @@
 		int size = N/NTHREADS ;
 
 	  	for (int k=0 ; k<N ; k++)
-	    {
+	    {			
 			#pragma omp parallel 
-			{	int id = omp_get_thread_num();
+			{	
+				int id = omp_get_thread_num();
+				int to = (id + 1)*size;
 				double tmpkr = 0.0;
 				double tmpki = 0.0;
-
-				int to = (id + 1)*size;
 
 				if(N%NTHREADS != 0 && id == NTHREADS - 1) // last thread
 					to += N%NTHREADS;
@@ -114,10 +114,11 @@
 				#pragma omp critical
 				Xr_o[k] += tmpkr;
 				Xi_o[k] += tmpki;
+				
 
 			} 
 	    }
-	    
+
 	    // normalize if you are doing IDFT
 	    if (idft==-1){
 	    	for (int n=0 ; n<N ; n++){
