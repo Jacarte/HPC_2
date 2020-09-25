@@ -92,7 +92,7 @@
 	  free(Xi_o); free(Xr_o);
 	  free(xr_check); free(xi_check);
 
-	  return 1;
+	  return 0;
 	}
 
 
