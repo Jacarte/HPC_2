@@ -22,13 +22,6 @@ typedef struct {
 	char padding[PAD];
 } MAXINFO;
 
-double mysecond(){  
-	struct timeval tp;  
-	struct timezone tzp;  
-	int i;  i = gettimeofday(&tp,&tzp);  
-	return ( 
-		(double) tp.tv_sec + (double) tp.tv_usec * 1.e-6 );}
-
 void init_array(){
 	srand(time(0)); // seed
    for(int i=0; i < N;i++){
@@ -135,11 +128,11 @@ int maxOmpTempIndexesPadding(){
 
 int main(void){
 	
-	double t1, t2;  
+	double start_time,run_time;  
 
 
 	init_array();
-	t1 = mysecond(); 
+	start_time = omp_get_wtime(); 
 	for(int i = 0; i < NTRIES; i++) 
 	 #ifdef SERIAL 
 	 	max(); 
@@ -160,9 +153,10 @@ int main(void){
 	 #ifdef OMP4
 		maxOmpTempIndexesPadding();
 	 #endif
-	t2 = mysecond();  
 
-	printf("%f %d  %.6f\n", maxval, maxloc, (t2 - t1)/(double)NTRIES);
+	run_time = omp_get_wtime() - start_time;
+	
+	printf("%f %d  %.6f\n", maxval, maxloc, run_time/(double)NTRIES);
 
 }
 

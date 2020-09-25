@@ -19,14 +19,6 @@ vect_t *forces;
 double *masses;
 int T;
 
-double mysecond(){  
-	struct timeval tp;  
-	struct timezone tzp;  
-	int i;  i = gettimeofday(&tp,&tzp);  
-	return ( 
-		(double) tp.tv_sec + (double) tp.tv_usec * 1.e-6 );}
-
-
 int init(){
 
 	for(int i = 0; i < n; i++){
@@ -82,7 +74,7 @@ int main(void){
 
 	#ifdef MEASURE_TIME
 	double t1, t2;  
-	t1 = mysecond(); 
+	t1 = omp_get_wtime(); 
 	#endif
 
 	for(int i = 1; i <= T; i++){
@@ -144,7 +136,7 @@ int main(void){
 		if(i == T){
 
 			#ifdef MEASURE_TIME
-			t2 = mysecond(); 
+			t2 = omp_get_wtime(); 
 			printf("%d %f %d %.6f\n", n, time_delta, T, (t2 - t1));
 			#else
 			printf("Simulation results\n idx - (postion) (velocity)\n");
