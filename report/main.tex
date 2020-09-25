@@ -19,6 +19,7 @@
 \usepackage[margin=1in]{geometry} 
 \usepackage{amsmath,amsthm,amssymb}
 \usepackage{graphicx}
+\usepackage{hyperref}
 \usepackage{float}
 \usepackage[table,x11names]{xcolor}
 \usepackage[lined, linesnumbered]{algorithm2e}
@@ -131,6 +132,8 @@ FDD3258 - Introduction to High-Performance Computing
 \hrule
 \vspace{.2in}
 
+
+All source code can be found here \url{https://github.com/Jacarte/HPC\_2}.
 
 \section{Exercise 1 - OpenMP Hello World, get familiar with OpenMP Environment}
 
@@ -357,6 +360,19 @@ int DFT(int idft, double* xr, double* xi, double* Xr_o, double* Xi_o, int N){
 	\end{figure}
     
     \item \textit{Which performance optimizations would be suitable for DFT, other than parallelization with OpenMP? Explain, no need for implementing the optimizations.}
+	
+	\begin{lstlisting}[style=CStyle,firstnumber=119]
+		...
+			for (int n=0; n < N  ; n++)  {
+			  // Real part of X[k]
+			  int id = omp_get_thread_num();
+			  tmp[id].r += xr[n] * cos(n * k * PI2 / N) + idft*xi[n]*sin(n * k * PI2 / N);
+			  // Imaginary part of X[k]
+			  tmp[id].i += -idft*xr[n] * sin(n * k * PI2 / N) + xi[n] * cos(n * k * PI2 / N);
+		...
+			\end{lstlisting}
+
+	SIMD (vectorization) if one of the optimizations that can be applied to DFTW. Inside the loop listed below, the instructions can be rearranged to get a succesfull vectorization. However, we have to take into account the rounding errors. For example, we found particullarly peculiar the fact that parallelizing the algorithm the rounding errors become important in calculated components.
 \end{enumerate}
 \end{document}
 
