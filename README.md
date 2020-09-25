@@ -1,25 +1,28 @@
 ![Test project](https://github.com/Jacarte/HPC_2/workflows/Test%20project/badge.svg)  ![Build report to artifact](https://github.com/Jacarte/HPC_2/workflows/Build%20document%20to%20artifact/badge.svg)
+
+The PDF report can be downloaded from the GihubAction artifact named **Build document to artifact**. Download the report from the latest succesfull running.
+
+
 ## Exercise 1
 
-Exercise 1 – OpenMP Hello World, get familiar with OpenMP Environment
-
-1 -  Write an OpenMP [C code](hello.c) with each thread printing Hello World from Thread X! where X is the thread ID.
-
-2 - Answers
-  - To enable openmp in my local machine: ```gcc-9 -fopenmp```. Look at [README](README.md)
-  - Ways to set the number of threads:
-    - Before compiling ```export OMP_NUM_THREADS=<num_threads>```
-	- In runtime ```omp_set_num_threads()```
+Source code is in folder **hello**
 
 
-Exercise 2 – STREAM
+## Exercise 2
 
-- Inside the folder stream, run ```bash run_stream.sh```. Ensure your **CC** flag is referencing an openmp-supporting compiler.
- 
-
-Exercise 3 – MAX
-
-- Inside the folder max, run ```bash measure_all.sh```. Ensure your **CC** flag is referencing an openmp-supporting compiler.
+Source code is in folder **stream**
 
 
-The pdf report is in the folder report
+## Exercise 3
+
+Source code is in folder **max**
+
+
+## Exercise 4
+
+Source code is in folder **dftw**
+
+
+## Exercise 5 (WIP)
+
+Source code is in folder **nbody**
