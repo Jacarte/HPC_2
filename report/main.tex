@@ -302,10 +302,61 @@ int maxOmpTempIndexesPadding() {
     \end{lstlisting}
 \end{enumerate}
 \section{Exercise 4. DFTW, The Fastest DFT in the West}
-
-\begin{figure}[H]
-	\centering
+\begin{enumerate}
+    \item \textit{Parallelize the DFTW code with OpenMP. You can develop different strategies; the important point is that the code produces the correct results and it is fast!}\\
+    To parallelize the DFT implementation, we maintain a temporary array of structures for each thread that holds the computed real and imaginary values, and some padding to ensure there is no unnecessary cache revalidation. For each value of N (the input size), we first initialize with zero the temporary arrays to store the real and imaginary values of the output vector. Next, we divide the workload (computation of the real and imaginary vectors) equally among a certain number of threads. These values get stored in the temporary arrays of each thread. Finally, we aggregate the values in the temporary arrays by adding them to obtain the final output vectors.\\
+    \begin{lstlisting}[style=CStyle]
+typedef struct {
+  double r;
+  int i;
+  char padding[PAD];
+} TMPINFO;
+// DFT/IDFT routine
+// idft: 1 direct DFT, -1 inverse IDFT (Inverse DFT)
+int DFT(int idft, double* xr, double* xi, double* Xr_o, double* Xi_o, int N){
+  omp_set_num_threads(NTHREADS);
+  TMPINFO* tmp = (TMPINFO *) malloc(NTHREADS*sizeof(TMPINFO));
+  for (int k=0 ; k<N ; k++) {
+    for(int i = 0; i < NTHREADS; i++) {
+      tmp[i].r = 0.0;
+      tmp[i].i = 0.0;	
+    }
+  
+  #pragma omp parallel for schedule(static)
+    for (int n=0; n < N  ; n++)  {
+      // Real part of X[k]
+      int id = omp_get_thread_num();
+      tmp[id].r += xr[n] * cos(n * k * PI2 / N) + idft*xi[n]*sin(n * k * PI2 / N);
+      // Imaginary part of X[k]
+      tmp[id].i += -idft*xr[n] * sin(n * k * PI2 / N) + xi[n] * cos(n * k * PI2 / N);
+    }
+    for(int i = 0; i < NTHREADS; i++){
+      Xr_o[k] += tmp[i].r;
+      Xi_o[k] += tmp[i].i;	
+    }
+  }
+  free(tmp);
+  // normalize if you are doing IDFT
+  if (idft==-1) {
+    for (int n=0 ; n<N ; n++){
+      Xr_o[n] /=N;
+      Xi_o[n] /=N;
+    }
+  }
+  return 1; 
+}
+    \end{lstlisting}
+    
+    \item \textit{Measure the performance on Beskow 32 cores reporting the average values and standard deviation for DFTW using an input size equal to 10000 (N=10000).}\\
+    The average execution time across 10 runs for prallelized DFTW for 32 threads on Beskow, and for an input size of 10000, was found to be 0.9896783 seconds. The standard deviation was 0.00203.
+    
+    \item \textit{Prepare a speed-up plot varying the number of threads: 1, 2, 4, 8, 12, 16, 20, 24, 28 and 32.}
+    \begin{figure}[H]
+    \centering
 	\includegraphics[width=0.8\textwidth]{dftw.pdf}
-\end{figure}
+	\end{figure}
+    
+    \item \textit{Which performance optimizations would be suitable for DFT, other than parallelization with OpenMP? Explain, no need for implementing the optimizations.}
+\end{enumerate}
 \end{document}
 
