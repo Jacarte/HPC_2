@@ -1,4 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %
 % Welcome to Overleaf --- just edit your LaTeX on the left,
 % and we'll compile it for you on the right. If you give 
@@ -191,12 +192,14 @@ We run the given STREAM benchmark program, for which the schedule was set as gui
 		\item \textit{Prepare a plot (with Excel, Matlab, Gnuplot, …) comparing the bandwidth using 1-2-4-8-12-16-20-24-28-32 threads.}
 		
 		\begin{figure}[H]
+			\centering
 			\includegraphics[width=0.8\textwidth]{stream.pdf}
 		\end{figure}
 		\item \textit{How does the bandwidth measured with copy kernel depend on the number of threads?}
 		The bandwidth of the copy kernel in STREAM increases as we increase the number of threads up to a certain threshold, and then flattens out. Adding more threads after an optimal number of threads increases overhead as all the threads have to access the same shared memory system, which itself has a finite bandwidth.
 		\item \textit{Prepare a plot comparing the bandwidth measured with copy kernel with static, dynamic and guided schedules using 32 threads.}
 		\begin{figure}[H]
+			\centering
 			\includegraphics[width=0.8\textwidth]{stream2.pdf}
 		\end{figure}
 		\begin{enumerate}
